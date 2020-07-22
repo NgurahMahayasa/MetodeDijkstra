@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:575754183893:android:f8bc1747b26428410cae5c",
+        "mobilesdk_app_id": "1:575754183893:android:3b69b0b928274f5a0cae5c",
         "android_client_info": {
-          "package_name": "com.example.metodejikstra"
+          "package_name": "com.example.metodedjikstra"
         }
       },
       "oauth_client": [

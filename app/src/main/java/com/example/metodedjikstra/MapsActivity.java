@@ -2,6 +2,7 @@ package com.example.metodedjikstra;
 
 import androidx.fragment.app.FragmentActivity;
 
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
@@ -14,17 +15,17 @@ import android.view.*;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.maps.android.PolyUtil;
 
 import org.json.JSONArray;
@@ -37,6 +38,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -45,6 +47,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private Polyline currentPolyline;
     private DataHelper dataHelper;
+
+    //Session untuk menyimpan data
+    final String NAMASESSION = "NamaMap";
+
+    SharedPreferences sp;
+    SharedPreferences.Editor spEditor;
 
     Button btnNode, btnLine, btnRoute, btnClear, btnLineTutup, btnTracking, btnRefresh;
     TextView tvProses;
@@ -63,6 +71,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     ArrayList<String> route;
     ArrayList<String> id_tutup;
+
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +93,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+
+        sp = getSharedPreferences("MySession",MODE_PRIVATE);
+        Log.d("MySession", sp.getString(NAMASESSION,""));
+
+        if(sp.getString(NAMASESSION,"") == ""){
+            String currentDateTimeString = android.text.format.DateFormat.format("yyyMMddhhmmss",new Date()).toString();
+            spEditor = sp.edit();
+            spEditor.putString(NAMASESSION,currentDateTimeString);
+            spEditor.commit();
+
+            Log.d("Session", currentDateTimeString);
+        }
+        else{
+            Log.d("Session Ada", sp.getString(NAMASESSION,""));
+        }
 
         btnNode = (Button) findViewById(R.id.btn_node);
         btnLine = (Button) findViewById(R.id.btn_line);
@@ -353,6 +378,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //insert to sqlite
         SQLiteDatabase db = dataHelper.getWritableDatabase();
         db.execSQL("INSERT INTO m_node (nama_node,lat,lng) VALUES ('"+String.valueOf(jmlNode)+"','"+lat+"','"+lng+"')");
+
+        Cursor cursor = db.rawQuery("SELECT * FROM m_node",null);
+        cursor.moveToFirst();
+
+        for (int i = 0; i < cursor.getCount(); i++){
+            cursor.moveToPosition(i);
+            String id = cursor.getString(0);
+            String nama_node = cursor.getString(1);
+            String rlat = cursor.getString(2);
+            String rlng = cursor.getString(3);
+            ModelNode modelNode = new ModelNode(nama_node,rlat,rlng);
+
+            DatabaseReference dNode = database.getReference("anak1");
+            dNode.child("m_node").child(id).setValue(modelNode);
+//            dNode.removeValue();
+        }
+
+
 
         Toast toast = Toast.makeText(getApplicationContext(), "Node "+String.valueOf(jmlNode)+" telah dibuat!", Toast.LENGTH_LONG);
         toast.show();
