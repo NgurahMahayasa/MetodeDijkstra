@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "575754183893",
+    "firebase_url": "https://app-djikstra.firebaseio.com",
+    "project_id": "app-djikstra",
+    "storage_bucket": "app-djikstra.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:575754183893:android:f8bc1747b26428410cae5c",
+        "android_client_info": {
+          "package_name": "com.example.metodejikstra"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "575754183893-95jeuhc2cmisqmnp6lhg6nc59rg7frp6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOTSO3K_l8kiBxMOg9-N9htXg0UFLh5pA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "575754183893-95jeuhc2cmisqmnp6lhg6nc59rg7frp6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

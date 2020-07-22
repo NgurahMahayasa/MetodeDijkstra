@@ -58,6 +58,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     int jmlNode = 0;
     int node_awal, node_akhir, route_awal, route_akhir, tutup_awal = 0, tutup_akhir = 0;
 
+    Double loc_lat = -8.6551843;
+    Double loc_long = 115.2159034;
+
     ArrayList<String> route;
     ArrayList<String> id_tutup;
 
@@ -186,7 +189,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(final GoogleMap googleMap) {
         mMap = googleMap;
 
-        LatLng lok_awal = new LatLng(-8.6551843,115.2159034);
+        LatLng lok_awal = new LatLng(loc_lat,loc_long);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lok_awal , 17.0f));
 
         getData();
