@@ -2,11 +2,13 @@ package com.example.metodedjikstra;
 
 import androidx.fragment.app.FragmentActivity;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.*;
@@ -50,6 +52,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     //Session untuk menyimpan data
     final String NAMASESSION = "NamaMap";
+    String namaSession;
 
     SharedPreferences sp;
     SharedPreferences.Editor spEditor;
@@ -72,7 +75,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     ArrayList<String> route;
     ArrayList<String> id_tutup;
 
-    FirebaseDatabase database = FirebaseDatabase.getInstance();
+    DataFirebase dataFirebase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,26 +91,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             e.printStackTrace();
         }
 
-
         setContentView(R.layout.activity_home);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
 
-        sp = getSharedPreferences("MySession",MODE_PRIVATE);
-        Log.d("MySession", sp.getString(NAMASESSION,""));
+        sp = getSharedPreferences("MySession", MODE_PRIVATE);
+        Log.d("MySession", sp.getString(NAMASESSION, ""));
 
-        if(sp.getString(NAMASESSION,"") == ""){
-            String currentDateTimeString = android.text.format.DateFormat.format("yyyMMddhhmmss",new Date()).toString();
+        if (sp.getString(NAMASESSION, "") == "") {
+            String currentDateTimeString = android.text.format.DateFormat.format("yyyMMddhhmmss", new Date()).toString();
             spEditor = sp.edit();
-            spEditor.putString(NAMASESSION,currentDateTimeString);
+            spEditor.putString(NAMASESSION, currentDateTimeString);
             spEditor.commit();
 
             Log.d("Session", currentDateTimeString);
+        } else {
+            Log.d("Session Ada", sp.getString(NAMASESSION, ""));
         }
-        else{
-            Log.d("Session Ada", sp.getString(NAMASESSION,""));
-        }
+
+        namaSession = sp.getString(NAMASESSION, "");
+
+        dataFirebase = new DataFirebase(namaSession);
 
         btnNode = (Button) findViewById(R.id.btn_node);
         btnLine = (Button) findViewById(R.id.btn_line);
@@ -147,15 +152,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 tipe = "route";
                 tvProses.setText("Add Route");
 
-                if(routeDraw){
+                if (routeDraw) {
                     routeDraw = false;
                     btnRoute.setText("Add Route");
 
                     Log.d("Route", String.valueOf(route.size()));
                     addRoute();
                     route = new ArrayList<String>();
-                }
-                else{
+                } else {
                     routeDraw = true;
                     btnRoute.setText("Save Route");
                     Toast toast = Toast.makeText(getApplicationContext(), "Pilih Route", Toast.LENGTH_LONG);
@@ -199,6 +203,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
         mapFragment.getMapAsync(this);
+
+        // ATTENTION: This was auto-generated to handle app links.
+        Intent appLinkIntent = getIntent();
+        String appLinkAction = appLinkIntent.getAction();
+        Uri appLinkData = appLinkIntent.getData();
+
+        Log.d("getIntent", appLinkAction);
     }
 
     /**
@@ -274,18 +285,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             db.execSQL("INSERT INTO m_line (id_node_awal,id_node_akhir,p_latlng, jarak) " +
                                     "VALUES ('"+node_awal+"','"+node_akhir+"','"+p_latlng+"','"+jarak+"')");
 
-//                        db = dataHelper.getReadableDatabase();
-//                        Cursor cursor = db.rawQuery("SELECT * FROM m_line",null);
-//
-//                        cursor.moveToFirst();
-//                        if(cursor.getCount() > 0){
-//                            for (int i = 0; i < cursor.getCount(); i++) {
-//                                cursor.moveToPosition(i);
-//                                Log.d("Ambil data", cursor.getString(1));
-//                                Log.d("Ambil data", cursor.getString(2));
-//                                Log.d("Ambil data", cursor.getString(3));
-//                            }
-//                        }
+                            Cursor cursor = db.rawQuery("SELECT * FROM m_line",null);
+                            cursor.moveToFirst();
+
+                            for (int i = 0; i < cursor.getCount(); i++){
+                                cursor.moveToPosition(i);
+                                String id = cursor.getString(0);
+                                String id_node_awal = cursor.getString(1);
+                                String id_node_akhir = cursor.getString(2);
+                                String dp_latlng = cursor.getString(3);
+                                String djarak = cursor.getString(4);
+                                ModelLine modelLine = new ModelLine(id_node_awal,id_node_akhir,djarak,dp_latlng);
+
+                                dataFirebase.InsertLine(id,modelLine);
+                            }
 
                             node_awal = 0;
                             node_akhir = 0;
@@ -390,9 +403,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             String rlng = cursor.getString(3);
             ModelNode modelNode = new ModelNode(nama_node,rlat,rlng);
 
-            DatabaseReference dNode = database.getReference("anak1");
-            dNode.child("m_node").child(id).setValue(modelNode);
-//            dNode.removeValue();
+            dataFirebase.InsertNode(id,modelNode);
         }
 
 
@@ -425,19 +436,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         db.execSQL("INSERT INTO m_route (route) " +
                 "VALUES ('"+i_route+"')");
 
+        Cursor cursor = db.rawQuery("SELECT * FROM m_route",null);
+        cursor.moveToFirst();
+
+        for (int i = 0; i < cursor.getCount(); i++){
+            cursor.moveToPosition(i);
+            String id = cursor.getString(0);
+            String route = cursor.getString(1);
+            ModelRoute modelRoute = new ModelRoute(route);
+
+            dataFirebase.InsertRoute(id,modelRoute);
+        }
+
         Toast toast = Toast.makeText(getApplicationContext(), "Route Telah Disimpan! Route :"+route, Toast.LENGTH_LONG);
         toast.show();
-//        db = dataHelper.getReadableDatabase();
-//        Cursor cursor = db.rawQuery("SELECT * FROM m_route",null);
-//
-//        cursor.moveToFirst();
-//        if(cursor.getCount() > 0){
-//            for (int i = 0; i < cursor.getCount(); i++) {
-//                cursor.moveToPosition(i);
-//                Log.d("Ambil data", cursor.getString(1));
-//            }
-//        }
-
     }
 
     private void tutupLine(){
@@ -462,6 +474,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             String get_akhir = cursor.getString(2);
             id_tutup.add(get_awal+"-"+get_akhir);
 
+            for(Integer x = 0;x<id_tutup.size();x++){
+                dataFirebase.InsertTutup(x.toString(),id_tutup.get(x));
+            }
+
             Toast toast = Toast.makeText(getApplicationContext(), "Line Tutup Telah di Set!", Toast.LENGTH_LONG);
             toast.show();
         }
@@ -477,6 +493,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         db.execSQL("DELETE FROM m_node");
         db.execSQL("DELETE FROM m_line");
         db.execSQL("DELETE FROM m_route");
+
+        dataFirebase.RemoveAll();
     }
 
     private void getData(){
@@ -580,8 +598,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 ArrayList<String> point = new ArrayList<>();
 
                 for (String r : route){
-                    Log.d("ROute", r);
-
                     String[] pisah = r.split("-");
 
                     where = "(id_node_awal ='"+pisah[0]+"' AND id_node_akhir = '"+pisah[1]+"') " +
@@ -621,6 +637,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.d("Route Terpendek", String.valueOf(route_pendek));
 
             for(String p: points.get(route_pendek)){
+
+                dataFirebase.InsertPoint(String.valueOf(route_pendek),p);
 
                 List<LatLng> getLine = PolyUtil.decode(p);
 
