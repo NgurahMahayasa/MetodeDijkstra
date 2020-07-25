@@ -68,11 +68,11 @@
             android:textColor="@android:color/white"/>
 
         <Button
-            android:id="@+id/btn_refresh2"
+            android:id="@+id/btn_share"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@android:color/holo_purple"
+            android:background="@android:color/holo_green_dark"
             android:text="Sharing"
             android:textColor="@android:color/white" />
     </LinearLayout>

@@ -2,6 +2,7 @@ package com.example.metodedjikstra;
 
 import androidx.fragment.app.FragmentActivity;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -14,6 +15,7 @@ import android.os.StrictMode;
 import android.util.*;
 import android.widget.Button;
 import android.view.*;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,8 +28,9 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.DataSnapshot;
 import com.google.maps.android.PolyUtil;
 
 import org.json.JSONArray;
@@ -57,9 +60,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     SharedPreferences sp;
     SharedPreferences.Editor spEditor;
 
-    Button btnNode, btnLine, btnRoute, btnClear, btnLineTutup, btnTracking, btnRefresh;
+    Button btnNode, btnLine, btnRoute, btnClear, btnLineTutup, btnTracking, btnRefresh,btnShare;
     TextView tvProses;
     String tipe = "";
+
+    EditText txtIDShare,txtGetShare;
+    Button dialogGetData;
 
     ArrayList<LatLng> listLine;
     ArrayList storeLine;
@@ -74,8 +80,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     ArrayList<String> route;
     ArrayList<String> id_tutup;
+    ArrayList<String> id_tutup_line;
 
     DataFirebase dataFirebase;
+    DataGetFirebase dataGetFirebase;
+
+    AlertDialog dialog;
+    LayoutInflater inflater;
+    View dialogView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,12 +133,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         btnLineTutup = (Button) findViewById(R.id.btn_tutup);
         btnTracking = (Button) findViewById(R.id.btn_tracking);
         btnRefresh = (Button) findViewById(R.id.btn_refresh);
+        btnShare = (Button) findViewById(R.id.btn_share);
         tvProses = (TextView) findViewById(R.id.tv_proses);
 
         listLine = new ArrayList<LatLng>();
         storeLine = new ArrayList();
         route = new ArrayList<String>();
         id_tutup = new ArrayList<String>();
+        id_tutup_line = new ArrayList<>();
 
         dataHelper = new DataHelper(getApplicationContext());
 
@@ -188,6 +202,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+        btnShare.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialogShare();
+            }
+        });
+
         btnRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -202,14 +223,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+        dataFirebase.RefreshTracking();
         mapFragment.getMapAsync(this);
-
-        // ATTENTION: This was auto-generated to handle app links.
-        Intent appLinkIntent = getIntent();
-        String appLinkAction = appLinkIntent.getAction();
-        Uri appLinkData = appLinkIntent.getData();
-
-        Log.d("getIntent", appLinkAction);
     }
 
     /**
@@ -455,8 +470,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void tutupLine(){
         SQLiteDatabase db = dataHelper.getReadableDatabase();
 
-        String where = "(id_node_awal ='"+tutup_awal+"' AND id_node_akhir = '"+tutup_akhir+"') " +
-                "OR (id_node_awal ='"+tutup_akhir+"' AND id_node_akhir = '"+tutup_awal+"') ";
+        String where = "(id_node_awal ="+tutup_awal+" AND id_node_akhir = "+tutup_akhir+") " +
+                "OR (id_node_awal ="+tutup_akhir+" AND id_node_akhir = "+tutup_awal+") ";
         Cursor cursor = db.rawQuery("SELECT * FROM m_line WHERE "+where,null);
         cursor.moveToFirst();
 
@@ -473,9 +488,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             String get_awal = cursor.getString(1);
             String get_akhir = cursor.getString(2);
             id_tutup.add(get_awal+"-"+get_akhir);
+            id_tutup_line.add(cursor.getString(3));
+
+//            id_tutup.add(cursor.getString(3));
 
             for(Integer x = 0;x<id_tutup.size();x++){
-                dataFirebase.InsertTutup(x.toString(),id_tutup.get(x));
+                ModelTutup modelTutup = new ModelTutup(id_tutup.get(x),id_tutup_line.get(x));
+                dataFirebase.InsertTutup(x.toString(),modelTutup);
             }
 
             Toast toast = Toast.makeText(getApplicationContext(), "Line Tutup Telah di Set!", Toast.LENGTH_LONG);
@@ -498,8 +517,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void getData(){
+        Log.d("GetData", "getData: ");
         SQLiteDatabase db = dataHelper.getReadableDatabase();
-
 
         //Node ====================
         Cursor cursor_n = db.rawQuery("SELECT * FROM m_node",null);
@@ -636,9 +655,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             Log.d("Route Terpendek", String.valueOf(route_pendek));
 
+            Integer x = 0;
             for(String p: points.get(route_pendek)){
 
-                dataFirebase.InsertPoint(String.valueOf(route_pendek),p);
+                ModelPoint modelPoint = new ModelPoint(p);
+                dataFirebase.InsertPoint(x.toString(),modelPoint);
 
                 List<LatLng> getLine = PolyUtil.decode(p);
 
@@ -648,6 +669,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
                 mMap.addPolyline(options);
+                x++;
             }
         }
         else{
@@ -665,6 +687,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         storeLine = new ArrayList();
         route = new ArrayList<String>();
         id_tutup = new ArrayList<String>();
+        id_tutup_line.clear();
+
+        dataFirebase.RefreshTracking();
 
         node_awal = 0;
         node_akhir = 0;
@@ -700,41 +725,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return jarak;
     }
 
+    private void dialogShare(){
+        dialog = new AlertDialog.Builder(MapsActivity.this).create();
+        inflater = getLayoutInflater();
+        dialogView = inflater.inflate(R.layout.dialog_share,null);
+        dialog.setView(dialogView);
+        dialog.setTitle("Share Tracking");
 
-    public static JSONObject getJSONObjectFromURL(String urlString) throws IOException, JSONException {
+        txtIDShare = (EditText) dialogView.findViewById(R.id.editTextShare);
+        txtGetShare = (EditText) dialogView.findViewById(R.id.editTextInputShare);
+        dialogGetData = (Button) dialogView.findViewById(R.id.btnGetShareData);
 
-        HttpURLConnection urlConnection = null;
+        txtIDShare.setText(namaSession);
 
-        URL url = new URL(urlString);
+        dialogGetData.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SQLiteDatabase db = dataHelper.getWritableDatabase();
 
-        urlConnection = (HttpURLConnection) url.openConnection();
+                db.execSQL("DELETE FROM m_line");
+                db.execSQL("DELETE FROM m_node");
+                db.execSQL("DELETE FROM m_route");
 
-        urlConnection.setRequestMethod("GET");
-        urlConnection.setReadTimeout(10000 /* milliseconds */);
-        urlConnection.setConnectTimeout(15000 /* milliseconds */);
+                dataGetFirebase = new DataGetFirebase(db,txtGetShare.getText().toString(),namaSession,mMap);
+                dataGetFirebase.getDataFirebase();
 
-        urlConnection.setDoOutput(true);
-
-        urlConnection.connect();
-
-        BufferedReader br=new BufferedReader(new InputStreamReader(url.openStream()));
-
-        char[] buffer = new char[1024];
-
-        String jsonString = new String();
-
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while ((line = br.readLine()) != null) {
-            sb.append(line+"\n");
-        }
-        br.close();
-
-        jsonString = sb.toString();
-
-        System.out.println("JSON: " + jsonString);
-        urlConnection.disconnect();
-
-        return new JSONObject(jsonString);
+                dialog.dismiss();
+                Toast toast = Toast.makeText(getApplicationContext(), "Sharing Route Berhasil!", Toast.LENGTH_LONG);
+                toast.show();
+            }
+        });
+        dialog.show();
     }
 }

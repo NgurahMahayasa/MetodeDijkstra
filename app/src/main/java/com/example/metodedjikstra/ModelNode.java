@@ -15,6 +15,7 @@ public class ModelNode {
         this.lng = lng;
     }
 
+
     public String getNama_node() {
         return nama_node;
     }

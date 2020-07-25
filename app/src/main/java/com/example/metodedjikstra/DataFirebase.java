@@ -31,12 +31,17 @@ public class DataFirebase {
         dNode.removeValue();
     }
 
-    public void InsertTutup(String id,String data){
-        dNode.child("m_tutup").child(id).setValue(data);
+    public void RefreshTracking(){
+        dNode.child("m_tutup").removeValue();
+        dNode.child("m_point").removeValue();
     }
 
-    public void InsertPoint(String id,String data){
-        dNode.child("m_point").child(id).setValue(data);
+    public void InsertTutup(String id,ModelTutup modelTutup){
+        dNode.child("m_tutup").child(id).setValue(modelTutup);
+    }
+
+    public void InsertPoint(String id,ModelPoint modelPoint){
+        dNode.child("m_point").child(id).setValue(modelPoint);
     }
 
 }
