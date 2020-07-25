@@ -1,4 +1,4 @@
-package com.example.metodedjikstra;
+package com.example.metodedjikstra2;
 
 public class ModelNode {
     private String nama_node;

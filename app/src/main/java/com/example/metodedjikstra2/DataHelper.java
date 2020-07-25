@@ -1,9 +1,8 @@
-package com.example.metodedjikstra;
+package com.example.metodedjikstra2;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 public class DataHelper extends SQLiteOpenHelper {
 

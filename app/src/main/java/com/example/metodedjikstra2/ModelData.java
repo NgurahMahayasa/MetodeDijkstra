@@ -1,4 +1,4 @@
-package com.example.metodedjikstra;
+package com.example.metodedjikstra2;
 
 import java.util.List;
 

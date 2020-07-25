@@ -1,34 +1,42 @@
 {
   "project_info": {
-    "project_number": "575754183893",
-    "firebase_url": "https://app-djikstra.firebaseio.com",
-    "project_id": "app-djikstra",
-    "storage_bucket": "app-djikstra.appspot.com"
+    "project_number": "1051006721679",
+    "firebase_url": "https://appdjikstra-907a1.firebaseio.com",
+    "project_id": "appdjikstra-907a1",
+    "storage_bucket": "appdjikstra-907a1.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:575754183893:android:3b69b0b928274f5a0cae5c",
+        "mobilesdk_app_id": "1:1051006721679:android:88d1ac33806f6c5e891afa",
         "android_client_info": {
-          "package_name": "com.example.metodedjikstra"
+          "package_name": "com.example.metodedjikstra2"
         }
       },
       "oauth_client": [
         {
-          "client_id": "575754183893-95jeuhc2cmisqmnp6lhg6nc59rg7frp6.apps.googleusercontent.com",
+          "client_id": "1051006721679-5qv538j40401gtmg1opiuisk6lcj6afk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.metodedjikstra2",
+            "certificate_hash": "3ca20f12192bc7eec675cf2722e5aed96ce509c8"
+          }
+        },
+        {
+          "client_id": "1051006721679-uagmvs106csedm5dfhjkvc7p342jn3ac.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBOTSO3K_l8kiBxMOg9-N9htXg0UFLh5pA"
+          "current_key": "AIzaSyAHZE2ZZJPcorG99jfHIKWqEit5HO2W_Jk"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "575754183893-95jeuhc2cmisqmnp6lhg6nc59rg7frp6.apps.googleusercontent.com",
+              "client_id": "1051006721679-uagmvs106csedm5dfhjkvc7p342jn3ac.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

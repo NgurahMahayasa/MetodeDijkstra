@@ -1,15 +1,12 @@
-package com.example.metodedjikstra;
+package com.example.metodedjikstra2;
 
 import androidx.fragment.app.FragmentActivity;
 
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
-import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.*;
@@ -28,24 +25,11 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.database.DataSnapshot;
 import com.google.maps.android.PolyUtil;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.ListIterator;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -512,6 +496,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         db.execSQL("DELETE FROM m_node");
         db.execSQL("DELETE FROM m_line");
         db.execSQL("DELETE FROM m_route");
+
+        id_tutup.clear();
+        id_tutup_line.clear();
+        route.clear();
 
         dataFirebase.RemoveAll();
     }

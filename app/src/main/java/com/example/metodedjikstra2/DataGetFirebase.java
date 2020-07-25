@@ -1,4 +1,4 @@
-package com.example.metodedjikstra;
+package com.example.metodedjikstra2;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -6,13 +6,11 @@ import android.graphics.Color;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
